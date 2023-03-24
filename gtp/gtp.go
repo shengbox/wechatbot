@@ -2,13 +2,16 @@ package gtp
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/869413421/wechatbot/config"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/869413421/wechatbot/config"
+	openai "github.com/sashabaranov/go-openai"
 )
 
 const BASEURL = "https://api.openai.com/v1/"
@@ -42,10 +45,10 @@ type ChatGPTRequestBody struct {
 }
 
 // Completions gtp文本模型回复
-//curl https://api.openai.com/v1/completions
-//-H "Content-Type: application/json"
-//-H "Authorization: Bearer your chatGPT key"
-//-d '{"model": "text-davinci-003", "prompt": "give me good song", "temperature": 0, "max_tokens": 7}'
+// curl https://api.openai.com/v1/completions
+// -H "Content-Type: application/json"
+// -H "Authorization: Bearer your chatGPT key"
+// -d '{"model": "text-davinci-003", "prompt": "give me good song", "temperature": 0, "max_tokens": 7}'
 func Completions(msg string) (string, error) {
 	requestBody := ChatGPTRequestBody{
 		Model:            "text-davinci-003",
@@ -97,4 +100,29 @@ func Completions(msg string) (string, error) {
 	}
 	log.Printf("gpt response text: %s \n", reply)
 	return reply, nil
+}
+
+// gpt-3.5-turbo
+func Completions3Dot5(msg string) (string, error) {
+	apiKey := config.LoadConfig().ApiKey
+
+	client := openai.NewClient(apiKey)
+	resp, err := client.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model: openai.GPT3Dot5Turbo,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: msg,
+				},
+			},
+		},
+	)
+
+	if err != nil {
+		fmt.Printf("ChatCompletion error: %v\n", err)
+		return "", err
+	}
+	return resp.Choices[0].Message.Content, nil
 }
