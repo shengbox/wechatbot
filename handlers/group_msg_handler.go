@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"github.com/869413421/wechatbot/gtp"
-	"github.com/eatmoreapple/openwechat"
 	"log"
 	"strings"
+
+	"github.com/869413421/wechatbot/gtp"
+	"github.com/eatmoreapple/openwechat"
 )
 
 var _ MessageHandlerInterface = (*GroupMessageHandler)(nil)
@@ -87,7 +88,7 @@ func (g *GroupMessageHandler) ReplyText(msg *openwechat.Message) error {
 
 // buildRequestText 构建请求GPT的文本，替换掉机器人名称，然后检查是否有上下文，如果有拼接上
 func buildRequestText(sender *openwechat.User, msg *openwechat.Message) string {
-	replaceText := "@" + sender.Self.NickName
+	replaceText := "@" + sender.NickName
 	requestText := strings.TrimSpace(strings.ReplaceAll(msg.Content, replaceText, ""))
 	if requestText == "" {
 		return ""
