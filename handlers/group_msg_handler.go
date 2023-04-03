@@ -6,6 +6,7 @@ import (
 
 	"github.com/869413421/wechatbot/gtp"
 	"github.com/eatmoreapple/openwechat"
+	"github.com/sashabaranov/go-openai"
 )
 
 var _ MessageHandlerInterface = (*GroupMessageHandler)(nil)
@@ -56,11 +57,11 @@ func (g *GroupMessageHandler) ReplyText(msg *openwechat.Message) error {
 	}
 
 	// 替换掉@文本，设置会话上下文，然后向GPT发起请求。
-	requestText := buildRequestText(sender, msg)
-	if requestText == "" {
+	messages := buildRequestText(sender, msg)
+	if messages == nil {
 		return nil
 	}
-	reply, err := gtp.Completions(requestText)
+	reply, err := gtp.Completions3Dot5(*messages)
 	if err != nil {
 		log.Printf("gtp request error: %v \n", err)
 		_, err = msg.ReplyText("机器人神了，我一会发现了就去修。")
@@ -77,7 +78,11 @@ func (g *GroupMessageHandler) ReplyText(msg *openwechat.Message) error {
 	reply = strings.TrimSpace(reply)
 	reply = strings.Trim(reply, "\n")
 	// 设置上下文
-	UserService.SetUserSessionContext(sender.ID(), requestText, reply)
+	*messages = append(*messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleAssistant,
+		Content: reply,
+	})
+	UserService.SetUserSessionContext(sender.ID(), *messages)
 	replyText := atText + reply
 	_, err = msg.ReplyText(replyText)
 	if err != nil {
@@ -87,12 +92,16 @@ func (g *GroupMessageHandler) ReplyText(msg *openwechat.Message) error {
 }
 
 // buildRequestText 构建请求GPT的文本，替换掉机器人名称，然后检查是否有上下文，如果有拼接上
-func buildRequestText(sender *openwechat.User, msg *openwechat.Message) string {
+func buildRequestText(sender *openwechat.User, msg *openwechat.Message) *[]openai.ChatCompletionMessage {
 	replaceText := "@" + sender.NickName
 	requestText := strings.TrimSpace(strings.ReplaceAll(msg.Content, replaceText, ""))
 	if requestText == "" {
-		return ""
+		return nil
 	}
-	requestText = UserService.GetUserSessionContext(sender.ID()) + requestText
-	return requestText
+	messages := UserService.GetUserSessionContext(sender.ID())
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: requestText,
+	})
+	return &messages
 }

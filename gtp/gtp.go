@@ -103,7 +103,7 @@ func Completions(msg string) (string, error) {
 }
 
 // gpt-3.5-turbo
-func Completions3Dot5(msg string) (string, error) {
+func Completions3Dot5(messages []openai.ChatCompletionMessage) (string, error) {
 	apiKey := config.LoadConfig().ApiKey
 
 	// client := openai.NewClient(apiKey)
@@ -119,19 +119,16 @@ func Completions3Dot5(msg string) (string, error) {
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: openai.GPT3Dot5Turbo,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: msg,
-				},
-			},
+			Model:    openai.GPT3Dot5Turbo,
+			Messages: messages,
 		},
 	)
+	log.Println("request:", messages)
 
 	if err != nil {
 		fmt.Printf("ChatCompletion error: %v\n", err)
 		return "", err
 	}
+	log.Println("resp:", resp)
 	return resp.Choices[0].Message.Content, nil
 }

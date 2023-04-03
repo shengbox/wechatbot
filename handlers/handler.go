@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"fmt"
+	"log"
+	"runtime"
+
 	"github.com/869413421/wechatbot/config"
 	"github.com/869413421/wechatbot/service"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/skip2/go-qrcode"
-	"log"
-	"runtime"
 )
 
 // MessageHandlerInterface 消息处理接口
@@ -60,7 +61,7 @@ func Handler(msg *openwechat.Message) {
 		if config.LoadConfig().AutoPass {
 			_, err := msg.Agree("你好我是基于chatGPT引擎开发的微信机器人，你可以向我提问任何问题。")
 			if err != nil {
-				log.Fatalf("add friend agree error : %v", err)
+				log.Printf("add friend agree error : %v", err)
 				return
 			}
 		}

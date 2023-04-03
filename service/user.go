@@ -1,17 +1,19 @@
 package service
 
 import (
-	"github.com/869413421/wechatbot/config"
-	"github.com/patrickmn/go-cache"
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/869413421/wechatbot/config"
+	"github.com/patrickmn/go-cache"
+	"github.com/sashabaranov/go-openai"
 )
 
 // UserServiceInterface 用户业务接口
 type UserServiceInterface interface {
-	GetUserSessionContext(userId string) string
-	SetUserSessionContext(userId string, question, reply string)
+	GetUserSessionContext(userId string) []openai.ChatCompletionMessage
+	SetUserSessionContext(userId string, messages []openai.ChatCompletionMessage)
 	ClearUserSessionContext(userId string, msg string) bool
 }
 
@@ -38,16 +40,16 @@ func NewUserService() UserServiceInterface {
 }
 
 // GetUserSessionContext 获取用户会话上下文文本
-func (s *UserService) GetUserSessionContext(userId string) string {
+func (s *UserService) GetUserSessionContext(userId string) []openai.ChatCompletionMessage {
 	sessionContext, ok := s.cache.Get(userId)
 	if !ok {
-		return ""
+		return []openai.ChatCompletionMessage{}
 	}
-	return sessionContext.(string)
+	return sessionContext.([]openai.ChatCompletionMessage)
 }
 
 // SetUserSessionContext 设置用户会话上下文文本，question用户提问内容，GTP回复内容
-func (s *UserService) SetUserSessionContext(userId string, question, reply string) {
-	value := question + "\n" + reply
+func (s *UserService) SetUserSessionContext(userId string, value []openai.ChatCompletionMessage) {
+	// value := question + "\n" + reply
 	s.cache.Set(userId, value, time.Second*config.LoadConfig().SessionTimeout)
 }

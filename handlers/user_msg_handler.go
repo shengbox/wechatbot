@@ -6,6 +6,7 @@ import (
 
 	"github.com/869413421/wechatbot/gtp"
 	"github.com/eatmoreapple/openwechat"
+	"github.com/sashabaranov/go-openai"
 )
 
 var _ MessageHandlerInterface = (*UserMessageHandler)(nil)
@@ -44,8 +45,12 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	requestText := strings.TrimSpace(msg.Content)
 	requestText = strings.Trim(msg.Content, "\n")
 
-	requestText = UserService.GetUserSessionContext(sender.ID()) + requestText
-	reply, err := gtp.Completions3Dot5(requestText)
+	messages := UserService.GetUserSessionContext(sender.ID())
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: requestText,
+	})
+	reply, err := gtp.Completions3Dot5(messages)
 	if err != nil {
 		log.Printf("gtp request error: %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
@@ -58,7 +63,11 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	// 设置上下文，回复用户
 	reply = strings.TrimSpace(reply)
 	reply = strings.Trim(reply, "\n")
-	UserService.SetUserSessionContext(sender.ID(), requestText, reply)
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleAssistant,
+		Content: reply,
+	})
+	UserService.SetUserSessionContext(sender.ID(), messages)
 	reply = "本消息由 chatGPT 回复：\n" + reply
 	_, err = msg.ReplyText(reply)
 	if err != nil {
