@@ -106,7 +106,16 @@ func Completions(msg string) (string, error) {
 func Completions3Dot5(msg string) (string, error) {
 	apiKey := config.LoadConfig().ApiKey
 
-	client := openai.NewClient(apiKey)
+	// client := openai.NewClient(apiKey)
+	config := openai.ClientConfig{
+		HTTPClient:         &http.Client{},
+		BaseURL:            config.LoadConfig().BaseURL,
+		OrgID:              "",
+		AuthToken:          apiKey,
+		EmptyMessagesLimit: uint(300),
+	}
+
+	client := openai.NewClientWithConfig(config)
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{

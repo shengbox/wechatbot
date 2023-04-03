@@ -12,6 +12,8 @@ import (
 type Configuration struct {
 	// gtp apikey
 	ApiKey string `json:"api_key"`
+	// 自定义域名
+	BaseURL string `json:"base_URL"`
 	// 自动通过好友
 	AutoPass bool `json:"auto_pass"`
 	// 会话超时时间
