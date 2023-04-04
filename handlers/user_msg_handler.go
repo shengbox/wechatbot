@@ -46,6 +46,12 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	requestText = strings.Trim(msg.Content, "\n")
 
 	messages := UserService.GetUserSessionContext(sender.ID())
+	if len(messages) == 0 {
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: "You are a helpful assistant.",
+		})
+	}
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
 		Content: requestText,
