@@ -43,7 +43,12 @@ func NewUserService() UserServiceInterface {
 func (s *UserService) GetUserSessionContext(userId string) []openai.ChatCompletionMessage {
 	sessionContext, ok := s.cache.Get(userId)
 	if !ok {
-		return []openai.ChatCompletionMessage{}
+		return []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleSystem,
+				Content: "You are a helpful assistant.",
+			},
+		}
 	}
 	return sessionContext.([]openai.ChatCompletionMessage)
 }

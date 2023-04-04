@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -32,6 +33,9 @@ func NewUserMessageHandler() MessageHandlerInterface {
 func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	// 接收私聊消息
 	sender, err := msg.Sender()
+	if err != nil {
+		fmt.Println(err)
+	}
 	log.Printf("Received User %v Text Msg : %v", sender.NickName, msg.Content)
 	if UserService.ClearUserSessionContext(sender.ID(), msg.Content) {
 		_, err = msg.ReplyText("上下文已经清空了，你可以问下一个问题啦。")
@@ -43,19 +47,21 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 
 	// 获取上下文，向GPT发起请求
 	requestText := strings.TrimSpace(msg.Content)
-	requestText = strings.Trim(msg.Content, "\n")
+	requestText = strings.Trim(requestText, "\n")
 
 	messages := UserService.GetUserSessionContext(sender.ID())
-	if len(messages) == 0 {
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: requestText,
+	})
+	// 保留5个上下文
+	if len(messages) > 10 {
+		messages = messages[len(messages)-10:]
 		messages = append(messages, openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleSystem,
 			Content: "You are a helpful assistant.",
 		})
 	}
-	messages = append(messages, openai.ChatCompletionMessage{
-		Role:    openai.ChatMessageRoleUser,
-		Content: requestText,
-	})
 	reply, err := gtp.Completions3Dot5(messages)
 	if err != nil {
 		log.Printf("gtp request error: %v \n", err)
