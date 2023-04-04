@@ -115,15 +115,19 @@ func Completions3Dot5(messages []openai.ChatCompletionMessage) (string, error) {
 		EmptyMessagesLimit: uint(300),
 	}
 
+	log.Println("request:", messages)
+
 	client := openai.NewClientWithConfig(config)
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model:    openai.GPT3Dot5Turbo,
-			Messages: messages,
+			Model:           openai.GPT3Dot5Turbo,
+			Messages:        messages,
+			Temperature:     1,
+			MaxTokens:       2000,
+			PresencePenalty: 0,
 		},
 	)
-	log.Println("request:", messages)
 
 	if err != nil {
 		fmt.Printf("ChatCompletion error: %v\n", err)
