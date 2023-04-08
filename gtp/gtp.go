@@ -104,20 +104,13 @@ func Completions(msg string) (string, error) {
 
 // gpt-3.5-turbo
 func Completions3Dot5(messages []openai.ChatCompletionMessage) (string, error) {
-	apiKey := config.LoadConfig().ApiKey
-
-	// client := openai.NewClient(apiKey)
-	config := openai.ClientConfig{
-		HTTPClient:         &http.Client{},
-		BaseURL:            config.LoadConfig().BaseURL,
-		OrgID:              "",
-		AuthToken:          apiKey,
-		EmptyMessagesLimit: uint(300),
-	}
-
 	log.Println("request:", messages)
 
-	client := openai.NewClientWithConfig(config)
+	apiKey := config.LoadConfig().ApiKey
+	cfg := openai.DefaultConfig(apiKey)
+	cfg.BaseURL = config.LoadConfig().BaseURL
+
+	client := openai.NewClientWithConfig(cfg)
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{

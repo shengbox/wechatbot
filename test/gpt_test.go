@@ -5,21 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"testing"
 
+	"github.com/869413421/wechatbot/config"
 	"github.com/sashabaranov/go-openai"
 )
 
 func TestGptStream(t *testing.T) {
-	config := openai.ClientConfig{
-		HTTPClient:         &http.Client{},
-		BaseURL:            "",
-		OrgID:              "",
-		AuthToken:          "",
-		EmptyMessagesLimit: uint(300),
-	}
-	client := openai.NewClientWithConfig(config)
+	apiKey := config.LoadConfig().ApiKey
+	cfg := openai.DefaultConfig(apiKey)
+	cfg.BaseURL = config.LoadConfig().BaseURL
+	client := openai.NewClientWithConfig(cfg)
 
 	messages := []openai.ChatCompletionMessage{
 		{Role: openai.ChatMessageRoleUser, Content: "你好呀"},
