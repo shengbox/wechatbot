@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -12,7 +13,7 @@ import (
 
 // UserServiceInterface 用户业务接口
 type UserServiceInterface interface {
-	GetUserSessionContext(userId string) []openai.ChatCompletionMessage
+	GetUserSessionContext(userId, nickname string) []openai.ChatCompletionMessage
 	SetUserSessionContext(userId string, messages []openai.ChatCompletionMessage)
 	ClearUserSessionContext(userId string, msg string) bool
 }
@@ -40,13 +41,14 @@ func NewUserService() UserServiceInterface {
 }
 
 // GetUserSessionContext 获取用户会话上下文文本
-func (s *UserService) GetUserSessionContext(userId string) []openai.ChatCompletionMessage {
+func (s *UserService) GetUserSessionContext(userId, nickname string) []openai.ChatCompletionMessage {
 	sessionContext, ok := s.cache.Get(userId)
 	if !ok {
+		fmt.Println("nickname===", nickname)
 		return []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: "You are a helpful assistant.",
+				Content: "You are a helpful assistant.你在与你的用户对话，用户的昵称是:" + nickname,
 			},
 		}
 	}

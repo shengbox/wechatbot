@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/869413421/wechatbot/gtp"
+	"github.com/869413421/wechatbot/gpt"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/sashabaranov/go-openai"
 )
@@ -49,7 +49,7 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	requestText := strings.TrimSpace(msg.Content)
 	requestText = strings.Trim(requestText, "\n")
 
-	messages := UserService.GetUserSessionContext(sender.ID())
+	messages := UserService.GetUserSessionContext(sender.ID(), sender.NickName)
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
 		Content: requestText,
@@ -62,7 +62,7 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 			Content: "You are a helpful assistant.",
 		})
 	}
-	reply, err := gtp.Completions3Dot5(messages)
+	reply, err := gpt.CreateChatCompletion(messages)
 	if err != nil {
 		log.Printf("gtp request error: %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
@@ -80,7 +80,7 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 		Content: reply,
 	})
 	UserService.SetUserSessionContext(sender.ID(), messages)
-	reply = "本消息由 chatGPT 回复：\n" + reply
+	reply = "小助理：\n" + reply
 	_, err = msg.ReplyText(reply)
 	if err != nil {
 		log.Printf("response user error: %v \n", err)

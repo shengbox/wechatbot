@@ -1,0 +1,56 @@
+[
+    {
+        "name": "get_job_list",
+        "description": "获取目前正在招聘中的岗位数据",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "brandName": {
+                    "type": "string",
+                    "description": "在招聘岗位的商家品牌名称"
+                },
+                "city": {
+                    "type": "string",
+                    "description": "岗位所在城市"
+                },
+                "jobAttribute": {
+                    "type": "string",
+                    "description": "岗位性质，比如全职或者兼职"
+                },
+                "keyword": {
+                    "type": "string",
+                    "description": "岗位关键字，可以用来查询岗位福利相关的信息，比如:包吃包住,带薪培训等,不支持传用户昵称做完参数"
+                }
+            },
+            "required": []
+        }
+    },
+    {
+        "name": "get_user_info",
+        "description": "根据用户昵称获取用户详细信息",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "nickname": {
+                    "type": "string",
+                    "description": "用户的昵称"
+                }
+            },
+            "required": ["nickname"]
+        }
+    },
+    {
+        "name": "get_apply_list",
+        "description": "根据一个人的昵称查询他已应聘、已报名的岗位列表",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "nickname": {
+                    "type": "string",
+                    "description": "用户的昵称"
+                }
+            },
+            "required": ["nickname"]
+        }
+    }
+]

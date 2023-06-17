@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/869413421/wechatbot/gtp"
+	"github.com/869413421/wechatbot/gpt"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/sashabaranov/go-openai"
 )
@@ -47,6 +47,7 @@ func (g *GroupMessageHandler) ReplyText(msg *openwechat.Message) error {
 		return err
 	}
 	atText := "@" + groupSender.NickName + " "
+	log.Println("groupSender.NickName:", groupSender.NickName)
 
 	if UserService.ClearUserSessionContext(sender.ID(), msg.Content) {
 		_, err = msg.ReplyText(atText + "上下文已经清空了，你可以问下一个问题啦。")
@@ -61,7 +62,7 @@ func (g *GroupMessageHandler) ReplyText(msg *openwechat.Message) error {
 	if messages == nil {
 		return nil
 	}
-	reply, err := gtp.Completions3Dot5(*messages)
+	reply, err := gpt.CreateChatCompletion(*messages)
 	if err != nil {
 		log.Printf("gtp request error: %v \n", err)
 		_, err = msg.ReplyText("机器人神了，我一会发现了就去修。")
@@ -93,12 +94,16 @@ func (g *GroupMessageHandler) ReplyText(msg *openwechat.Message) error {
 
 // buildRequestText 构建请求GPT的文本，替换掉机器人名称，然后检查是否有上下文，如果有拼接上
 func buildRequestText(sender *openwechat.User, msg *openwechat.Message) *[]openai.ChatCompletionMessage {
-	replaceText := "@" + sender.NickName
+	groupSender, _ := msg.SenderInGroup()
+	log.Println("2groupSender.NickName:", groupSender.NickName)
+
+	// replaceText := "@" + sender.NickName
+	replaceText := "@" + groupSender.NickName
 	requestText := strings.TrimSpace(strings.ReplaceAll(msg.Content, replaceText, ""))
 	if requestText == "" {
 		return nil
 	}
-	messages := UserService.GetUserSessionContext(sender.ID())
+	messages := UserService.GetUserSessionContext(sender.ID(), groupSender.NickName)
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
 		Content: requestText,
