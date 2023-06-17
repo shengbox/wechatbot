@@ -19,6 +19,7 @@ var funcs []*openai.FunctionDefine
 
 func init() {
 	data, err := os.ReadFile("functions.json")
+	fmt.Println(string(data))
 	if err != nil {
 		log.Fatal("Error reading file:", err)
 		return

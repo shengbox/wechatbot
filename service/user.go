@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -44,7 +43,6 @@ func NewUserService() UserServiceInterface {
 func (s *UserService) GetUserSessionContext(userId, nickname string) []openai.ChatCompletionMessage {
 	sessionContext, ok := s.cache.Get(userId)
 	if !ok {
-		fmt.Println("nickname===", nickname)
 		return []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
