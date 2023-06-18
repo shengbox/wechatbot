@@ -38,7 +38,7 @@ func Completions3Dot5(messages []openai.ChatCompletionMessage) (string, error) {
 			Model:           openai.GPT3Dot5Turbo16K0613,
 			Messages:        messages,
 			Temperature:     1,
-			MaxTokens:       2000,
+			MaxTokens:       4000,
 			PresencePenalty: 0,
 		},
 	)

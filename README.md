@@ -31,7 +31,7 @@ git clone https://github.com/869413421/wechatbot.git
 cd wechatbot
 
 # 复制配置文件
-copy config.dev.json config.json
+copy .env-sample .env
 
 # 启动项目
 go run main.go
@@ -39,16 +39,21 @@ go run main.go
 
 # 配置文件说明
 ````
-{
-"api_key": "your api key",
-"auto_pass": true,
-"session_timeout": 60
-}
-
-api_key：openai api_key
-auto_pass:是否自动通过好友添加
-session_timeout：会话超时时间，默认60秒，单位秒，在会话时间内所有发送给机器人的信息会作为上下文。
+# openai api key
+api_key= "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"
+# openai接口地址，也可以是代理地址
+base_URL= "https://api.openai.com/v1"
+# 自动通过好友
+auto_pass= true
+# 会话超时时间
+session_timeout= 60s
+# prompt中sysem的角色设定
+prompt.system= "You are a helpful assistant."
 ````
+
+```
+functions.json文件格式参照openai接口中functions的定义，api为实际请求api的地址，为了方便让AI理解，接口名称和参数的说明尽量写的详细
+```
 
 # 使用示例
 ### 向机器人发送`我要问下一个问题`，清空会话信息。
