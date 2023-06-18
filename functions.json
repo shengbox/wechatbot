@@ -2,6 +2,8 @@
     {
         "name": "get_job_list",
         "description": "获取目前正在招聘中的岗位数据",
+        "api": "https://api.aifusheng.com/api/zhaopin/index?sort=1&current=1&pageSize=3",
+        "method": "GET",
         "parameters": {
             "type": "object",
             "properties": {
@@ -28,6 +30,8 @@
     {
         "name": "get_user_info",
         "description": "根据用户昵称获取用户详细信息",
+        "api": "https://crm.aifusheng.com/api/user/info",
+        "method": "GET",
         "parameters": {
             "type": "object",
             "properties": {
@@ -42,6 +46,8 @@
     {
         "name": "get_apply_list",
         "description": "根据一个人的昵称查询他已应聘、已报名的岗位列表",
+        "api": "https://crm.aifusheng.com/api/apply/list",
+        "method": "GET",
         "parameters": {
             "type": "object",
             "properties": {

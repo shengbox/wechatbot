@@ -14,7 +14,7 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 WORKDIR /go
 COPY --from=builder /app/wechatbot .
-COPY --from=builder /app/config.json .
+COPY --from=builder /app/.env .
 # COPY --from=builder /app/storage.json .
 
 ENTRYPOINT ["./wechatbot"]

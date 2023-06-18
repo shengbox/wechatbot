@@ -3,38 +3,34 @@ package gpt
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/869413421/wechatbot/config"
 	"github.com/869413421/wechatbot/functions"
 	openai "github.com/sashabaranov/go-openai"
 )
 
-const BASEURL = "https://api.openai.com/v1/"
-
-var funcs []*openai.FunctionDefine
+var (
+	funcs  []*openai.FunctionDefine
+	client *openai.Client
+)
 
 func init() {
 	data, err := os.ReadFile("functions.json")
-	fmt.Println("functions.json==", string(data))
 	if err != nil {
 		log.Fatal("Error reading file:", err)
-		return
 	}
 	json.Unmarshal(data, &funcs)
+
+	cfg := openai.DefaultConfig(os.Getenv("api_key"))
+	cfg.BaseURL = os.Getenv("base_URL")
+	client = openai.NewClientWithConfig(cfg)
 }
 
 // gpt-3.5-turbo
 func Completions3Dot5(messages []openai.ChatCompletionMessage) (string, error) {
 	log.Println("request:", messages)
-	apiKey := config.LoadConfig().ApiKey
-	cfg := openai.DefaultConfig(apiKey)
-	cfg.BaseURL = config.LoadConfig().BaseURL
-	client := openai.NewClientWithConfig(cfg)
-
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
@@ -55,11 +51,6 @@ func Completions3Dot5(messages []openai.ChatCompletionMessage) (string, error) {
 }
 
 func CreateChatCompletion(messages []openai.ChatCompletionMessage) (string, error) {
-	apiKey := config.LoadConfig().ApiKey
-	cfg := openai.DefaultConfig(apiKey)
-	cfg.BaseURL = config.LoadConfig().BaseURL
-	client := openai.NewClientWithConfig(cfg)
-
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
@@ -78,34 +69,42 @@ func CreateChatCompletion(messages []openai.ChatCompletionMessage) (string, erro
 		var arguments map[string]string
 		json.Unmarshal([]byte(functionCall.Arguments), &arguments)
 
-		switch functionCall.Name {
-		case "get_job_list":
-			body := functions.GetJobList(arguments)
-			messages = append(messages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleFunction,
-				Content: body,
-				Name:    functionCall.Name,
-			})
-			return CreateChatCompletion(messages)
-		case "get_user_info":
-			body := functions.GetUserInfo(arguments)
-			messages = append(messages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleFunction,
-				Content: body,
-				Name:    functionCall.Name,
-			})
-			return CreateChatCompletion(messages)
-		case "get_apply_list":
-			body := functions.GetApplyList(arguments)
-			messages = append(messages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleFunction,
-				Content: body,
-				Name:    functionCall.Name,
-			})
-			return CreateChatCompletion(messages)
-		default:
-			return "", errors.New("unknow functionCall")
-		}
+		body, _ := functions.Call(functionCall.Name, arguments)
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleFunction,
+			Content: body,
+			Name:    functionCall.Name,
+		})
+		return CreateChatCompletion(messages)
+
+		// switch functionCall.Name {
+		// case "get_job_list":
+		// 	body := functions.GetJobList(arguments)
+		// 	messages = append(messages, openai.ChatCompletionMessage{
+		// 		Role:    openai.ChatMessageRoleFunction,
+		// 		Content: body,
+		// 		Name:    functionCall.Name,
+		// 	})
+		// 	return CreateChatCompletion(messages)
+		// case "get_user_info":
+		// 	body := functions.GetUserInfo(arguments)
+		// 	messages = append(messages, openai.ChatCompletionMessage{
+		// 		Role:    openai.ChatMessageRoleFunction,
+		// 		Content: body,
+		// 		Name:    functionCall.Name,
+		// 	})
+		// 	return CreateChatCompletion(messages)
+		// case "get_apply_list":
+		// 	body := functions.GetApplyList(arguments)
+		// 	messages = append(messages, openai.ChatCompletionMessage{
+		// 		Role:    openai.ChatMessageRoleFunction,
+		// 		Content: body,
+		// 		Name:    functionCall.Name,
+		// 	})
+		// 	return CreateChatCompletion(messages)
+		// default:
+		// 	return "", errors.New("unknow functionCall")
+		// }
 	}
 	return resp.Choices[0].Message.Content, nil
 }

@@ -1,11 +1,12 @@
 package service
 
 import (
+	"os"
 	"strings"
 	"time"
 	"unicode/utf8"
 
-	"github.com/869413421/wechatbot/config"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/patrickmn/go-cache"
 	"github.com/sashabaranov/go-openai"
 )
@@ -36,7 +37,8 @@ func (s *UserService) ClearUserSessionContext(userId string, msg string) bool {
 
 // NewUserService 创建新的业务层
 func NewUserService() UserServiceInterface {
-	return &UserService{cache: cache.New(time.Second*config.LoadConfig().SessionTimeout, time.Minute*10)}
+	sessionTimeout, _ := time.ParseDuration(os.Getenv("session_timeout"))
+	return &UserService{cache: cache.New(sessionTimeout, time.Minute*10)}
 }
 
 // GetUserSessionContext 获取用户会话上下文文本
@@ -56,5 +58,6 @@ func (s *UserService) GetUserSessionContext(userId, nickname string) []openai.Ch
 // SetUserSessionContext 设置用户会话上下文文本，question用户提问内容，GTP回复内容
 func (s *UserService) SetUserSessionContext(userId string, value []openai.ChatCompletionMessage) {
 	// value := question + "\n" + reply
-	s.cache.Set(userId, value, time.Second*config.LoadConfig().SessionTimeout)
+	sessionTimeout, _ := time.ParseDuration(os.Getenv("session_timeout"))
+	s.cache.Set(userId, value, sessionTimeout)
 }
