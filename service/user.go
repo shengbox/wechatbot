@@ -48,7 +48,7 @@ func (s *UserService) GetUserSessionContext(userId, nickname string) []openai.Ch
 		return []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: "You are a helpful assistant.你在与你的用户对话，用户的昵称是:" + nickname,
+				Content: os.Getenv("prompt.system") + "你在与你的用户对话，用户的昵称是:" + nickname,
 			},
 		}
 	}

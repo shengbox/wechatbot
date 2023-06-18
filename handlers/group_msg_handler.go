@@ -101,7 +101,7 @@ func buildRequestText(sender *openwechat.User, msg *openwechat.Message) *[]opena
 	if requestText == "" {
 		return nil
 	}
-	messages := UserService.GetUserSessionContext(sender.ID(), groupSender.NickName)
+	messages := UserService.GetUserSessionContext(sender.ID()+groupSender.ID(), groupSender.NickName)
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
 		Content: requestText,

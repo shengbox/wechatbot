@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/869413421/wechatbot/functions"
+	_ "github.com/joho/godotenv/autoload"
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -76,35 +77,6 @@ func CreateChatCompletion(messages []openai.ChatCompletionMessage) (string, erro
 			Name:    functionCall.Name,
 		})
 		return CreateChatCompletion(messages)
-
-		// switch functionCall.Name {
-		// case "get_job_list":
-		// 	body := functions.GetJobList(arguments)
-		// 	messages = append(messages, openai.ChatCompletionMessage{
-		// 		Role:    openai.ChatMessageRoleFunction,
-		// 		Content: body,
-		// 		Name:    functionCall.Name,
-		// 	})
-		// 	return CreateChatCompletion(messages)
-		// case "get_user_info":
-		// 	body := functions.GetUserInfo(arguments)
-		// 	messages = append(messages, openai.ChatCompletionMessage{
-		// 		Role:    openai.ChatMessageRoleFunction,
-		// 		Content: body,
-		// 		Name:    functionCall.Name,
-		// 	})
-		// 	return CreateChatCompletion(messages)
-		// case "get_apply_list":
-		// 	body := functions.GetApplyList(arguments)
-		// 	messages = append(messages, openai.ChatCompletionMessage{
-		// 		Role:    openai.ChatMessageRoleFunction,
-		// 		Content: body,
-		// 		Name:    functionCall.Name,
-		// 	})
-		// 	return CreateChatCompletion(messages)
-		// default:
-		// 	return "", errors.New("unknow functionCall")
-		// }
 	}
 	return resp.Choices[0].Message.Content, nil
 }
