@@ -3,9 +3,11 @@ package gpt
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/869413421/wechatbot/functions"
 	_ "github.com/joho/godotenv/autoload"
@@ -13,7 +15,7 @@ import (
 )
 
 var (
-	funcs  []*openai.FunctionDefine
+	funcs  []openai.FunctionDefinition
 	client *openai.Client
 )
 
@@ -79,4 +81,38 @@ func CreateChatCompletion(messages []openai.ChatCompletionMessage) (string, erro
 		return CreateChatCompletion(messages)
 	}
 	return resp.Choices[0].Message.Content, nil
+}
+
+// AssistantCompletion
+func AssistantCompletion(messages []openai.ChatCompletionMessage) (string, error) {
+	threadMessages := []openai.ThreadMessage{{
+		Role:    "user",
+		Content: messages[len(messages)-1].Content,
+	}}
+	run, err := client.CreateThreadAndRun(context.Background(), openai.CreateThreadAndRunRequest{
+		RunRequest: openai.RunRequest{
+			AssistantID: os.Getenv("assistant_id"),
+		},
+		Thread: openai.ThreadRequest{Messages: threadMessages},
+	})
+	if err != nil {
+		return "", err
+	}
+	for run.Status != openai.RunStatusCompleted {
+		run, err = client.RetrieveRun(context.Background(), run.ThreadID, run.ID)
+		if err != nil {
+			return "", err
+		}
+		if run.Status == openai.RunStatusFailed {
+			log.Println(run.LastError.Message)
+			return "", errors.New(string(run.LastError.Code))
+		}
+		time.Sleep(time.Second)
+	}
+
+	msgs, err := client.ListMessage(context.Background(), run.ThreadID, nil, nil, nil, nil)
+	if err != nil {
+		return "", err
+	}
+	return msgs.Messages[0].Content[0].Text.Value, nil
 }

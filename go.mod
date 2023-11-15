@@ -6,7 +6,7 @@ require (
 	github.com/eatmoreapple/openwechat v1.4.3
 	github.com/joho/godotenv v1.5.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/sashabaranov/go-openai v1.11.1
+	github.com/sashabaranov/go-openai v1.17.6
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 )
 

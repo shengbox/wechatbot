@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/869413421/wechatbot/gpt"
@@ -62,7 +63,12 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 			Content: "You are a helpful assistant.",
 		})
 	}
-	reply, err := gpt.CreateChatCompletion(messages)
+	var reply string
+	if os.Getenv("assistant_id") != "" {
+		reply, err = gpt.AssistantCompletion(messages)
+	} else {
+		reply, err = gpt.CreateChatCompletion(messages)
+	}
 	if err != nil {
 		log.Printf("gtp request error: %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
@@ -80,7 +86,7 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 		Content: reply,
 	})
 	UserService.SetUserSessionContext(sender.ID(), messages)
-	reply = "小助理：\n" + reply
+	// reply = "数字助理：\n" + reply
 	_, err = msg.ReplyText(reply)
 	if err != nil {
 		log.Printf("response user error: %v \n", err)

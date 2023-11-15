@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"log"
+	"os"
 	"strings"
 
 	"github.com/869413421/wechatbot/gpt"
@@ -61,7 +62,12 @@ func (g *GroupMessageHandler) ReplyText(msg *openwechat.Message) error {
 	if messages == nil {
 		return nil
 	}
-	reply, err := gpt.CreateChatCompletion(*messages)
+	var reply string
+	if os.Getenv("assistant_id") != "" {
+		reply, err = gpt.AssistantCompletion(*messages)
+	} else {
+		reply, err = gpt.CreateChatCompletion(*messages)
+	}
 	if err != nil {
 		log.Printf("gtp request error: %v \n", err)
 		_, err = msg.ReplyText("机器人神了，我一会发现了就去修。")
