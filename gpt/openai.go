@@ -116,3 +116,15 @@ func AssistantCompletion(messages []openai.ChatCompletionMessage) (string, error
 	}
 	return msgs.Messages[0].Content[0].Text.Value, nil
 }
+
+func Transcription(filePath string) (string, error) {
+	response, err := client.CreateTranscription(context.Background(), openai.AudioRequest{
+		Model:    "whisper-1",
+		FilePath: filePath,
+	})
+	if err != nil {
+		return "", err
+	}
+	log.Println("voice text: ", response.Text)
+	return response.Text, nil
+}

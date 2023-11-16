@@ -22,6 +22,18 @@ func (g *UserMessageHandler) handle(msg *openwechat.Message) error {
 	if msg.IsText() {
 		return g.ReplyText(msg)
 	}
+	if msg.IsVoice() {
+		msg.SaveFileToLocal(msg.MsgId + ".mp3")
+		txt, err := gpt.Transcription(msg.MsgId + ".mp3")
+		os.Remove(msg.MsgId + ".mp3")
+		if err != nil {
+			log.Printf("gtp request error: %v \n", err)
+			msg.ReplyText("机器人神了，我一会发现了就去修。")
+			return err
+		}
+		msg.Content = txt
+		return g.ReplyText(msg)
+	}
 	return nil
 }
 
