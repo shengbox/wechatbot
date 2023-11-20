@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -127,4 +128,24 @@ func Transcription(filePath string) (string, error) {
 	}
 	log.Println("voice text: ", response.Text)
 	return response.Text, nil
+}
+
+// 文本转语音
+func Speech(input, filename string) error {
+	response, err := client.CreateSpeech(context.Background(), openai.CreateSpeechRequest{
+		Model: openai.TTSModel1,
+		Input: input,
+		Voice: openai.VoiceAlloy,
+	})
+	// return response, err
+	if err != nil {
+		return err
+	}
+	defer response.Close()
+	voice, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(voice, response)
+	return err
 }

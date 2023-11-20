@@ -99,7 +99,20 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	})
 	UserService.SetUserSessionContext(sender.ID(), messages)
 	// reply = "数字助理：\n" + reply
-	_, err = msg.ReplyText(reply)
+
+	switch msg.MsgType {
+	case openwechat.MsgTypeVoice:
+		err = gpt.Speech(reply, msg.MsgId+".mp3")
+		if err != nil {
+			return err
+		}
+		voice, _ := os.Open(msg.MsgId + ".mp3")
+		_, err = msg.ReplyFile(voice)
+		os.Remove(msg.MsgId + ".mp3")
+	default:
+		_, err = msg.ReplyText(reply)
+	}
+	// _, err = msg.ReplyText(reply)
 	if err != nil {
 		log.Printf("response user error: %v \n", err)
 	}
