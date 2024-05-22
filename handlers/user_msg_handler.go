@@ -9,6 +9,8 @@ import (
 	"github.com/869413421/wechatbot/gpt"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/sashabaranov/go-openai"
+
+	"github.com/shengbox/go-util/funasr"
 )
 
 var _ MessageHandlerInterface = (*UserMessageHandler)(nil)
@@ -23,9 +25,11 @@ func (g *UserMessageHandler) handle(msg *openwechat.Message) error {
 		return g.ReplyText(msg)
 	}
 	if msg.IsVoice() {
-		msg.SaveFileToLocal(msg.MsgId + ".mp3")
-		txt, err := gpt.Transcription(msg.MsgId + ".mp3")
-		os.Remove(msg.MsgId + ".mp3")
+		mp3file := msg.MsgId + ".mp3"
+		msg.SaveFileToLocal(mp3file)
+		// txt, err := gpt.Transcription(mp3file)
+		txt, err := funasr.SpeechToText(mp3file, nil)
+		os.Remove(mp3file)
 		if err != nil {
 			log.Printf("gtp request error: %v \n", err)
 			msg.ReplyText("机器人神了，我一会发现了就去修。")
@@ -103,7 +107,7 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	// reply = "数字助理：\n" + reply
 
 	switch msg.MsgType {
-	case openwechat.MsgTypeVoice:
+	case openwechat.MsgTypeVideo: // 暂时移除tts服务
 		err = gpt.Speech(reply, msg.MsgId+".mp3")
 		if err != nil {
 			return err
