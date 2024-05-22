@@ -70,10 +70,12 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	// 保留5个上下文
 	if len(messages) > 10 {
 		messages = messages[len(messages)-10:]
-		messages = append(messages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: "You are a helpful assistant.",
-		})
+		if os.Getenv("prompt.system") != "" {
+			messages = append(messages, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleSystem,
+				Content: os.Getenv("prompt.system"),
+			})
+		}
 	}
 	var reply string
 	if os.Getenv("assistant_id") != "" {

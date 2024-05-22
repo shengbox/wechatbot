@@ -45,6 +45,9 @@ func NewUserService() UserServiceInterface {
 func (s *UserService) GetUserSessionContext(userId, nickname string) []openai.ChatCompletionMessage {
 	sessionContext, ok := s.cache.Get(userId)
 	if !ok {
+		if os.Getenv("prompt.system") == "" {
+			return []openai.ChatCompletionMessage{}
+		}
 		return []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
