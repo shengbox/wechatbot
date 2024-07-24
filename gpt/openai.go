@@ -118,6 +118,7 @@ func AssistantCompletion(messages []openai.ChatCompletionMessage) (string, error
 	return msgs.Messages[0].Content[0].Text.Value, nil
 }
 
+// 语音转文本
 func Transcription(filePath string) (string, error) {
 	response, err := client.CreateTranscription(context.Background(), openai.AudioRequest{
 		Model:    "whisper-1",
@@ -137,7 +138,6 @@ func Speech(input, filename string) error {
 		Input: input,
 		Voice: openai.VoiceAlloy,
 	})
-	// return response, err
 	if err != nil {
 		return err
 	}

@@ -9,8 +9,6 @@ import (
 	"github.com/869413421/wechatbot/gpt"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/sashabaranov/go-openai"
-
-	"github.com/shengbox/go-util/funasr"
 )
 
 var _ MessageHandlerInterface = (*UserMessageHandler)(nil)
@@ -27,8 +25,8 @@ func (g *UserMessageHandler) handle(msg *openwechat.Message) error {
 	if msg.IsVoice() {
 		mp3file := msg.MsgId + ".mp3"
 		msg.SaveFileToLocal(mp3file)
-		// txt, err := gpt.Transcription(mp3file)
-		txt, err := funasr.SpeechToText(mp3file, nil)
+		txt, err := gpt.Transcription(mp3file)
+		// txt, err := funasr.SpeechToText(mp3file, nil)
 		os.Remove(mp3file)
 		if err != nil {
 			log.Printf("gtp request error: %v \n", err)
@@ -37,6 +35,10 @@ func (g *UserMessageHandler) handle(msg *openwechat.Message) error {
 		}
 		msg.Content = txt
 		return g.ReplyText(msg)
+	}
+	if msg.IsPicture() {
+		picture := msg.MsgId + ".jpg"
+		msg.SaveFileToLocal(picture)
 	}
 	return nil
 }
