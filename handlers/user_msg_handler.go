@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -37,8 +39,7 @@ func (g *UserMessageHandler) handle(msg *openwechat.Message) error {
 		return g.ReplyText(msg)
 	}
 	if msg.IsPicture() {
-		picture := msg.MsgId + ".jpg"
-		msg.SaveFileToLocal(picture)
+		return g.ReplyText(msg)
 	}
 	return nil
 }
@@ -64,25 +65,42 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 		return nil
 	}
 
-	// 获取上下文，向GPT发起请求
-	requestText := strings.TrimSpace(msg.Content)
-	requestText = strings.Trim(requestText, "\n")
-
 	messages := UserService.GetUserSessionContext(sender.ID(), sender.NickName)
-	messages = append(messages, openai.ChatCompletionMessage{
-		Role:    openai.ChatMessageRoleUser,
-		Content: requestText,
-	})
-	// 保留5个上下文
-	if len(messages) > 10 {
-		messages = messages[len(messages)-10:]
-		if os.Getenv("prompt.system") != "" {
-			messages = append(messages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleSystem,
-				Content: os.Getenv("prompt.system"),
-			})
-		}
+	switch msg.MsgType {
+	case openwechat.MsgTypeImage:
+		log.Println("收到一张图片")
+		buffer := &bytes.Buffer{}
+		_ = msg.SaveFile(buffer)
+		encoded := base64.StdEncoding.EncodeToString(buffer.Bytes())
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role: openai.ChatMessageRoleUser,
+			MultiContent: []openai.ChatMessagePart{{
+				Type: openai.ChatMessagePartTypeImageURL,
+				ImageURL: &openai.ChatMessageImageURL{
+					URL: fmt.Sprintf("data:image/jpeg;base64,%s", encoded),
+				},
+			}},
+		})
+	default:
+		// 获取上下文，向GPT发起请求
+		requestText := strings.TrimSpace(msg.Content)
+		requestText = strings.Trim(requestText, "\n")
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: requestText,
+		})
 	}
+
+	// 保留5个上下文
+	// if len(messages) > 10 {
+	// 	messages = messages[len(messages)-10:]
+	// 	if os.Getenv("prompt.system") != "" {
+	// 		messages = append(messages, openai.ChatCompletionMessage{
+	// 			Role:    openai.ChatMessageRoleSystem,
+	// 			Content: os.Getenv("prompt.system"),
+	// 		})
+	// 	}
+	// }
 	var reply string
 	if os.Getenv("assistant_id") != "" {
 		reply, err = gpt.AssistantCompletion(messages)

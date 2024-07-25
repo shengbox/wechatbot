@@ -58,7 +58,7 @@ func CreateChatCompletion(messages []openai.ChatCompletionMessage) (string, erro
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model:     openai.GPT3Dot5Turbo16K0613,
+			Model:     openai.GPT4oMini20240718,
 			Messages:  messages,
 			Functions: funcs,
 		},
