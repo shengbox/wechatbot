@@ -1,70 +1,22 @@
 [
     {
-        "name": "get_job_list",
-        "description": "获取目前正在招聘中的岗位数据",
-        "api": "http://localhost:9080/api/ai/job?sort=1&current=1&pageSize=10",
+        "name": "simpleWeather",
+        "description": "查询某个城市的天气",
+        "api": "https://apis.juhe.cn/simpleWeather/query?key=251518e073ef6c3c9504dd286c3f6a86",
         "method": "GET",
         "parameters": {
             "type": "object",
             "properties": {
-                "brandName": {
-                    "type": "string",
-                    "description": "在招聘岗位的单位或者商家品牌名称"
-                },
                 "city": {
                     "type": "string",
-                    "description": "岗位所在城市"
+                    "description": "城市名称"
                 },
-                "jobAttribute": {
+                "key": {
                     "type": "string",
-                    "description": "岗位性质，比如全职或者兼职"
-                },
-                "address": {
-                    "type": "string",
-                    "description": "岗位地址"
-                },
-                "jobName": {
-                    "type": "string",
-                    "description": "岗位名称，比如导购,收银，如果是多个岗位可以用英文逗号分隔"
-                },
-                "treatment": {
-                    "type": "string",
-                    "description": "福利，比如包吃包住、带薪年假"
+                    "description": "密钥，固定值必须为:251518e073ef6c3c9504dd286c3f6a86"
                 }
             },
-            "required": ["city"]
-        }
-    },
-    {
-        "name": "get_user_info",
-        "description": "根据用户昵称获取用户详细信息",
-        "api": "http://localhost:9080/api/user/info",
-        "method": "GET",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "nickname": {
-                    "type": "string",
-                    "description": "用户的昵称"
-                }
-            },
-            "required": ["nickname"]
-        }
-    },
-    {
-        "name": "get_apply_list",
-        "description": "根据一个人的昵称查询他已应聘、已报名的岗位列表",
-        "api": "http://localhost:9080/api/apply/list",
-        "method": "GET",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "nickname": {
-                    "type": "string",
-                    "description": "用户的昵称"
-                }
-            },
-            "required": ["nickname"]
+            "required": ["city","key"]
         }
     }
 ]

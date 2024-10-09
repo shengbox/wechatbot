@@ -61,7 +61,7 @@ func Handler(msg *openwechat.Message) {
 	if msg.IsFriendAdd() {
 		autoPass, err := strconv.ParseBool(os.Getenv("auto_pass"))
 		if err == nil && autoPass {
-			_, err := msg.Agree("你好我是基于chatGPT引擎开发的微信机器人，你可以向我提问任何问题。")
+			_, err := msg.Agree("很高兴认识你。")
 			if err != nil {
 				log.Printf("add friend agree error : %v", err)
 				return

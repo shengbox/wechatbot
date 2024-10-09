@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	funcs  []openai.FunctionDefinition
+	tools  []openai.Tool
 	client *openai.Client
 )
 
@@ -25,7 +25,14 @@ func init() {
 	if err != nil {
 		log.Fatal("Error reading file:", err)
 	}
+	var funcs []openai.FunctionDefinition
 	json.Unmarshal(data, &funcs)
+	for _, fun := range funcs {
+		tools = append(tools, openai.Tool{
+			Type:     openai.ToolTypeFunction,
+			Function: &fun,
+		})
+	}
 
 	cfg := openai.DefaultConfig(os.Getenv("api_key"))
 	cfg.BaseURL = os.Getenv("base_URL")
@@ -58,9 +65,10 @@ func CreateChatCompletion(messages []openai.ChatCompletionMessage) (string, erro
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model:     openai.GPT4oMini20240718,
-			Messages:  messages,
-			Functions: funcs,
+			Model:    openai.GPT4oMini20240718,
+			Messages: messages,
+			Tools:    tools,
+			// Functions: funcs,
 		},
 	)
 	if err != nil {
@@ -78,6 +86,19 @@ func CreateChatCompletion(messages []openai.ChatCompletionMessage) (string, erro
 			Role:    openai.ChatMessageRoleFunction,
 			Content: body,
 			Name:    functionCall.Name,
+		})
+		return CreateChatCompletion(messages)
+	}
+	if resp.Choices[0].FinishReason == "tool_calls" {
+		toolCall := resp.Choices[0].Message.ToolCalls[0]
+		log.Println(toolCall.Function.Name, toolCall.Function.Arguments)
+		var arguments map[string]string
+		json.Unmarshal([]byte(toolCall.Function.Arguments), &arguments)
+		body, _ := functions.Call(toolCall.Function.Name, arguments)
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:       openai.ChatMessageRoleTool,
+			Content:    body,
+			ToolCallID: toolCall.ID,
 		})
 		return CreateChatCompletion(messages)
 	}
