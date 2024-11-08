@@ -32,7 +32,7 @@ func (g *UserMessageHandler) handle(msg *openwechat.Message) error {
 		os.Remove(mp3file)
 		if err != nil {
 			log.Printf("gtp request error: %v \n", err)
-			msg.ReplyText("机器人神了，我一会发现了就去修。")
+			msg.ReplyText("不知道发生了什么，我一会发现了就去修。")
 			return err
 		}
 		msg.Content = txt
@@ -109,7 +109,7 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	}
 	if err != nil {
 		log.Printf("gtp request error: %v \n", err)
-		msg.ReplyText("机器人神了，我一会发现了就去修。")
+		msg.ReplyText("不知道发生了什么，我一会发现了就去修。")
 		return err
 	}
 	if reply == "" {

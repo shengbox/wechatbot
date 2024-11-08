@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/869413421/wechatbot/functions"
@@ -77,11 +78,8 @@ func CreateChatCompletion(messages []openai.ChatCompletionMessage) (string, erro
 	}
 	if resp.Choices[0].FinishReason == "function_call" {
 		functionCall := resp.Choices[0].Message.FunctionCall
-		log.Println(functionCall.Name, functionCall.Arguments)
-		var arguments map[string]string
-		json.Unmarshal([]byte(functionCall.Arguments), &arguments)
-
-		body, _ := functions.Call(functionCall.Name, arguments)
+		log.Println("function_call")
+		body, _ := functions.Call(functionCall)
 		messages = append(messages, openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleFunction,
 			Content: body,
@@ -90,16 +88,21 @@ func CreateChatCompletion(messages []openai.ChatCompletionMessage) (string, erro
 		return CreateChatCompletion(messages)
 	}
 	if resp.Choices[0].FinishReason == "tool_calls" {
-		toolCall := resp.Choices[0].Message.ToolCalls[0]
-		log.Println(toolCall.Function.Name, toolCall.Function.Arguments)
-		var arguments map[string]string
-		json.Unmarshal([]byte(toolCall.Function.Arguments), &arguments)
-		body, _ := functions.Call(toolCall.Function.Name, arguments)
-		messages = append(messages, openai.ChatCompletionMessage{
+		functionCall := resp.Choices[0].Message.ToolCalls[0].Function
+		log.Println("tool_calls")
+		body, _ := functions.Call(&functionCall)
+		message := openai.ChatCompletionMessage{
 			Role:       openai.ChatMessageRoleTool,
 			Content:    body,
-			ToolCallID: toolCall.ID,
-		})
+			ToolCallID: resp.Choices[0].Message.ToolCalls[0].ID,
+			Name:       functionCall.Name,
+		}
+		if strings.ContainsAny(strings.ToLower(resp.Model), "qwen") {
+			message.Role = openai.ChatMessageRoleTool
+		} else {
+			message.Role = openai.ChatMessageRoleFunction
+		}
+		messages = append(messages, message)
 		return CreateChatCompletion(messages)
 	}
 	return resp.Choices[0].Message.Content, nil

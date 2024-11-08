@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/sashabaranov/go-openai"
 )
 
 var callMap = map[string]FunctionCall{}
@@ -24,15 +26,19 @@ func init() {
 	}
 }
 
-func Call(name string, arguments map[string]string) (string, error) {
-	call := callMap[name]
+func Call(functionCall *openai.FunctionCall) (string, error) {
+	log.Println(functionCall.Name, functionCall.Arguments)
 
-	reqBody, _ := json.Marshal(arguments)
-	req, _ := http.NewRequest(call.Method, call.API, bytes.NewReader(reqBody))
+	call := callMap[functionCall.Name]
+	var arguments map[string]string
+	json.Unmarshal([]byte(functionCall.Arguments), &arguments)
+	req, _ := http.NewRequest(call.Method, call.API, bytes.NewReader([]byte(functionCall.Arguments)))
 	if strings.ToUpper(call.Method) == "GET" {
 		q := req.URL.Query()
 		for k, v := range arguments {
-			q.Add(k, v)
+			if v != "" && k != "" {
+				q.Add(k, v)
+			}
 		}
 		req.URL.RawQuery = q.Encode()
 	}

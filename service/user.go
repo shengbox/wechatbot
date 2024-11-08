@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -51,7 +52,7 @@ func (s *UserService) GetUserSessionContext(userId, nickname string) []openai.Ch
 		return []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: os.Getenv("prompt.system") + "你在与你的用户对话，用户的昵称是:" + nickname,
+				Content: fmt.Sprintf("%s,你在与你的用户对话，用户的昵称是:%s,今天是%s", os.Getenv("prompt.system"), nickname, time.Now().Format("2006年01月02日")),
 			},
 		}
 	}

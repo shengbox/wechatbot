@@ -1,22 +1,26 @@
 [
     {
-        "name": "simpleWeather",
-        "description": "查询某个城市的天气",
-        "api": "https://apis.juhe.cn/simpleWeather/query?key=251518e073ef6c3c9504dd286c3f6a86",
+        "name": "contract_list",
+        "description": "查询合同列表",
+        "api": "http://proapi.daqingmei.com/api/data/contract",
         "method": "GET",
         "parameters": {
             "type": "object",
             "properties": {
-                "city": {
+                "客户名称": {
                     "type": "string",
-                    "description": "城市名称"
+                    "description": "客户名称"
                 },
-                "key": {
+                "合同类型": {
                     "type": "string",
-                    "description": "密钥，固定值必须为:251518e073ef6c3c9504dd286c3f6a86"
+                    "description": "合同类型"
+                },
+                "签约日期": {
+                    "type": "string",
+                    "description": "签约日期，支持模糊查询，比如查询查询2023年6月签订的合同该传'2023年06',查询2023年签订的合同则传'2023年'"
                 }
             },
-            "required": ["city","key"]
+            "required": []
         }
     }
 ]
