@@ -1,0 +1,30 @@
+[
+    {
+        "name": "queryMaterialPrice",
+        "description": "宁波市建筑安装材料市场价格信息查询，接口返回以下格式数据 fillinMonthShow: 2024年9月, categoryName: 01金属材料, name: 热轧带肋钢筋, format: HRB400 φ10, unit: t, decimalType: 1, price: 3549, priceTax: 4010, areaName: 宁海县其中除price是税价格,priceTax是含税价格",
+        "api": "http://nbjszj.zjw.ningbo.gov.cn/ylmm/api/zonghejia/index/material/queryMaterialPrice?pageSize=20",
+        "method": "GET",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "year": {
+                    "type": "string",
+                    "description": "年份,如2024"
+                },
+                "month": {
+                    "type": "string",
+                    "description": "月份,如08"
+                },
+                "materialName": {
+                    "type": "string",
+                    "description": "材料名称,比如:热轧带肋钢筋,橡胶止水带,水泥钉,陕西汉中雪花白大理石 等"
+                },
+                "areaCode": {
+                    "type": "string",
+                    "description": "地区编码,如果不指明地区则不传这个参数，即查询宁波市所有区域，宁波市区:sh001009001001,海曙区:001009001002,余姚市:001009001003,慈溪市:001009001004,宁海县:001009001005,北仑区:001009001006,鄞州区:001009001007,奉化区:001009001008,江北区:001009001009,镇海区:001009001010,象山县:001009001011,宁波杭州湾新区:001009001012"
+                }
+            },
+            "required": []
+        }
+    }
+]
