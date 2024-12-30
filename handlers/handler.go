@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/869413421/wechatbot/service"
 	"github.com/eatmoreapple/openwechat"
+	"github.com/shengbox/wechatbot/service"
 	"github.com/skip2/go-qrcode"
 )
 

@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/869413421/wechatbot/service"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/sashabaranov/go-openai"
+	"github.com/shengbox/wechatbot/service"
 )
 
 var _ MessageHandlerInterface = (*UserMessageHandler)(nil)
