@@ -168,11 +168,21 @@ func Transcription(filePath string) (string, error) {
 
 // 文本转语音
 func Speech(input, filename string) error {
-	response, err := client.CreateSpeech(context.Background(), openai.CreateSpeechRequest{
+	req := openai.CreateSpeechRequest{
 		Model: openai.TTSModel1,
-		Input: input,
 		Voice: openai.VoiceAlloy,
-	})
+		Speed: 1.1,
+		Input: input,
+	}
+	// 模型
+	if os.Getenv("speech_model") != "" {
+		req.Model = openai.SpeechModel(os.Getenv("speech_model"))
+	}
+	// 参考音色
+	if os.Getenv("speech_voice") != "" {
+		req.Voice = openai.SpeechVoice(os.Getenv("speech_voice"))
+	}
+	response, err := client.CreateSpeech(context.Background(), req)
 	if err != nil {
 		return err
 	}

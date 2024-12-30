@@ -127,8 +127,8 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	// reply = "数字助理：\n" + reply
 
 	switch msg.MsgType {
-	case openwechat.MsgTypeVideo: // 暂时移除tts服务
-		err = service.Speech(reply, msg.MsgId+".mp3")
+	case openwechat.MsgTypeVoice: // 暂时移除tts服务
+		err = service.Speech(msg.Content, msg.MsgId+".mp3")
 		if err != nil {
 			return err
 		}
