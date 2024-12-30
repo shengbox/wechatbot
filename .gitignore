@@ -6,6 +6,7 @@
 *.dylib
 .idea/
 storage.json
+cache
 
 # Test binary, built with `go test -c`
 *.test

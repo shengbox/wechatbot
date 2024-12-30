@@ -156,7 +156,7 @@ func AssistantCompletion(messages []openai.ChatCompletionMessage) (string, error
 // 语音转文本
 func Transcription(filePath string) (string, error) {
 	response, err := client.CreateTranscription(context.Background(), openai.AudioRequest{
-		Model:    "whisper-1",
+		Model:    os.Getenv("transcription_modal"),
 		FilePath: filePath,
 	})
 	if err != nil {
@@ -191,15 +191,15 @@ func Call(functionCall *openai.FunctionCall) (string, error) {
 
 	var arguments map[string]string
 	json.Unmarshal([]byte(functionCall.Arguments), &arguments)
-	log.Println("api", call.API, arguments)
 
 	if strings.ToUpper(call.Method) == "GET" {
 		resp, err := resty.New().R().SetQueryParams(arguments).Get(call.API)
-		log.Println("api result", resp.String(), err)
+		log.Println("API Request URL", resp.Request.URL)
+		log.Println("API Result", resp.String(), err)
 		return resp.String(), err
 	} else {
 		resp, err := resty.New().R().SetBody(arguments).Get(call.API)
-		log.Println("api result", resp.String(), err)
+		log.Println("API Result", resp.String(), err)
 		return resp.String(), err
 	}
 }
